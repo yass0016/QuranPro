@@ -48,13 +48,11 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
           itemBuilder: (BuildContext context, int position) => ListTile(
                 onTap: () {},
                 leading: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    Icon(Icons.keyboard_arrow_left, size: Style.iconSize(context, 16.0),)
+                    Icon(Icons.keyboard_arrow_left, size: Style.iconSize(context, 20.0),)
                   ],
                 ),
-                isThreeLine: true,
                 subtitle: Container(
                   child:
                       Wrap(textDirection: TextDirection.rtl, children: <Widget>[

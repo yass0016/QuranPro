@@ -48,10 +48,9 @@ class _JuzListScreenState extends State<JuzListScreen> {
           itemBuilder: (BuildContext context, int position) => ListTile(
             onTap: () {},
             leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                Icon(Icons.keyboard_arrow_left, size: Style.iconSize(context, 16.0),)
+                Icon(Icons.keyboard_arrow_left, size: Style.iconSize(context, 20.0),)
               ],
             ),
             isThreeLine: true,
