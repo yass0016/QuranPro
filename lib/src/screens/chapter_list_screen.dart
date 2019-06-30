@@ -2,6 +2,7 @@ import 'package:quranpro/src/helpers/SQLiteHelper.dart';
 import 'package:quranpro/src/models/chapter.dart';
 import 'package:flutter/material.dart';
 import 'package:quranpro/src/common/style.dart';
+import 'package:quranpro/src/screens/pages_screen.dart';
 
 class ChapterListScreen extends StatefulWidget {
   ChapterListScreen();
@@ -46,11 +47,19 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
           ),
           itemCount: _chapters.length,
           itemBuilder: (BuildContext context, int position) => ListTile(
-                onTap: () {},
+                onTap: () async {
+                  String page = await dbHelper.getPageFromChapter(_chapters[position].id);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PagesScreen(page: page),
+                    ),
+                  );
+                },
                 leading: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Icon(Icons.keyboard_arrow_left, size: Style.iconSize(context, 20.0),)
+                    Icon(Icons.keyboard_arrow_left)
                   ],
                 ),
                 subtitle: Container(

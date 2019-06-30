@@ -2,6 +2,7 @@ import 'package:quranpro/src/helpers/SQLiteHelper.dart';
 import 'package:quranpro/src/models/juz.dart';
 import 'package:flutter/material.dart';
 import 'package:quranpro/src/common/style.dart';
+import 'package:quranpro/src/screens/pages_screen.dart';
 
 class JuzListScreen extends StatefulWidget {
   JuzListScreen();
@@ -46,11 +47,19 @@ class _JuzListScreenState extends State<JuzListScreen> {
           ),
           itemCount: _juzs.length,
           itemBuilder: (BuildContext context, int position) => ListTile(
-            onTap: () {},
+            onTap: () async {
+              String page = await dbHelper.getPageFromJuz((position + 1).toString());
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PagesScreen(page: page),
+                ),
+              );
+            },
             leading: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(Icons.keyboard_arrow_left, size: Style.iconSize(context, 20.0),)
+                Icon(Icons.keyboard_arrow_left)
               ],
             ),
             isThreeLine: true,

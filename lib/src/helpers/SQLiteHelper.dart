@@ -8,6 +8,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:quranpro/src/models/chapter.dart';
 import 'package:quranpro/src/models/juz.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class SQLiteHelper {
   static final _databaseName = "quran.db";
 
@@ -19,6 +21,8 @@ class SQLiteHelper {
   final String tableQuranUthmaniMin = 'quran_uthmani_min';
   final String tableChapters = 'chapters';
   final String tableJuzs = 'juzs';
+  final String tableSuraAyaJuz = "sura_aya_juz";
+  final String tablePages = "pages";
 
   // make this a singleton class
   SQLiteHelper._privateConstructor();
@@ -76,11 +80,70 @@ class SQLiteHelper {
         await db.rawQuery('SELECT COUNT(*) FROM $tableQuranSimple'));
   }
 
-  // Get All Verses in Page
-  Future<List<Map<String, dynamic>>> getVersesInPage(int page) async {
+  Future<String> getPageFromChapter(String chapter) async {
     Database db = await instance.database;
+    return Sqflite.firstIntValue(await db.rawQuery(
+            "select p.page from $tablePages p JOIN $tableChapters c ON p._id = (c.start+1) WHERE c._id = '$chapter'"))
+        .toString();
+  }
+
+  Future<String> getPageFromJuz(String juz) async {
+    Database db = await instance.database;
+    return Sqflite.firstIntValue(await db.rawQuery(
+        "select p.page from $tablePages p JOIN $tableJuzs j ON p._id = (j.startingAya) WHERE j._id = '$juz'"))
+        .toString();
+  }
+
+  Future<Chapter> getChapterInfo(String id) async {
+    Database db = await instance.database;
+
+    Chapter chapter;
+
+    var query = await db.rawQuery("select * from $tableChapters WHERE _id = '$id'");
+
+    query.forEach((row) {
+      chapter = new Chapter(
+          row['_id'].toString(),
+          row['ayas'].toString(),
+          row['start'].toString(),
+          row['name'],
+          row['tname'],
+          row['ename'],
+          row['type'],
+          row['order'].toString(),
+          row['rukus'].toString());
+    });
+
+    return chapter;
+  }
+
+  // Get All Verses in Page
+  Future<List<Map<String, dynamic>>> getVersesInPage(String page) async {
+    Database db = await instance.database;
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String quranStyle = prefs.getString("quranStyle");
+
+    String tableQuranStyle;
+
+    if (quranStyle == "quran_simple")
+      tableQuranStyle = tableQuranSimple;
+    else if (quranStyle == "quran_simple_clean")
+      tableQuranStyle = tableQuranSimpleClean;
+    else if (quranStyle == "quran_simple_enhanced")
+      tableQuranStyle = tableQuranSimpleEnhanced;
+    else if (quranStyle == "quran_simple_min")
+      tableQuranStyle = tableQuranSimpleMin;
+    else if (quranStyle == "quran_uthmani")
+      tableQuranStyle = tableQuranUthmani;
+    else if (quranStyle == "quran_uthmani_min")
+      tableQuranStyle = tableQuranUthmaniMin;
+    else
+      tableQuranStyle = tableQuranSimple;
+
     return await db.rawQuery(
-        'select q.text, saj.new_juz, saj.juz from quran_simple q JOIN sura_aya_juz saj ON saj.sura = q.sura AND saj.aya = q.aya JOIN pages p ON p.sura = q.sura AND p.aya = q.aya WHERE p.page = $page;');
+        "select q.aya, q.sura, q.text, saj.new_juz, saj.juz from $tableQuranStyle q JOIN $tableSuraAyaJuz saj ON saj.sura = q.sura AND saj.aya = q.aya JOIN $tablePages p ON p.sura = q.sura AND p.aya = q.aya WHERE p.page = '$page'");
   }
 
   // Get All Chapters
@@ -92,15 +155,15 @@ class SQLiteHelper {
 
     query.forEach((row) {
       Chapter chapter = new Chapter(
-          row['_id'],
-          row['ayas'],
-          row['start'],
+          row['_id'].toString(),
+          row['ayas'].toString(),
+          row['start'].toString(),
           row['name'],
           row['tname'],
           row['ename'],
           row['type'],
-          row['order'],
-          row['rukus']);
+          row['order'].toString(),
+          row['rukus'].toString());
 
       chapters.add(chapter);
     });
@@ -116,8 +179,13 @@ class SQLiteHelper {
     var query = await db.rawQuery('select * from $tableJuzs');
 
     query.forEach((row) {
-      Juz juz = new Juz(row['_id'], row['sura'], row['startingAya'], row['aya'],
-          row['name'], row['tname']);
+      Juz juz = new Juz(
+          row['_id'].toString(),
+          row['sura'].toString(),
+          row['startingAya'].toString(),
+          row['aya'].toString(),
+          row['name'],
+          row['tname']);
 
       juzs.add(juz);
     });
