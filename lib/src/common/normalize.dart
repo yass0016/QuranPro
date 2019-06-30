@@ -7,12 +7,16 @@ class Normalize {
   static double normalizeWidth(BuildContext context, double width) {
     MediaQueryData queryData = MediaQuery.of(context);
 
-    return (width / baseUnitWidth) * queryData.size.width;
+    double normalize = (queryData.orientation == Orientation.portrait) ? baseUnitWidth : baseUnitHeight;
+
+    return (width / normalize) * queryData.size.width;
   }
 
   static double normalizeHeight(BuildContext context, double height) {
     MediaQueryData queryData = MediaQuery.of(context);
 
-    return (height / baseUnitHeight) * queryData.size.height;
+    double normalize = (queryData.orientation == Orientation.portrait) ? baseUnitHeight : baseUnitWidth;
+
+    return (height / normalize) * queryData.size.height;
   }
 }
